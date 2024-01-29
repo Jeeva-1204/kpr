@@ -116,8 +116,7 @@ def pay():
 @app.route('/bill')
 def bill():
    id=random.randint(11111111, 99999999)
-   # img=qr(id)
-   session['id']=id
+   img=qr(id)
    cn=session.get('cn')
    con=session.get('con')
    from1=session.get('from1')
@@ -130,7 +129,7 @@ def bill():
    server.starttls()
    server.login(GMAIL_USERNAME, GMAIL_PASSWORD)
    
-   html = render_template("mail.html" ,id=id,cn=cn,con=con,from1=from1,to=to,tamt=tamt)
+   html = render_template("mail.html",img=img ,id=id,cn=cn,con=con,from1=from1,to=to,tamt=tamt)
 
    msg = MIMEMultipart()
    msg["From"] = "ParkCo"
@@ -146,7 +145,7 @@ def bill():
    server.ehlo()
 
 
-   return render_template("bill.html" ,id=id,cn=cn,con=con,from1=from1,to=to,tamt=tamt)
+   return render_template("bill.html",img=img ,id=id,cn=cn,con=con,from1=from1,to=to,tamt=tamt)
 
 def calculate_amount(amount_per_hour, start_date_time, end_date_time):
     # Calculate the total duration in hours.
@@ -159,10 +158,10 @@ def calculate_amount(amount_per_hour, start_date_time, end_date_time):
 
     return total_amount
 
-@app.route('/qr')
-def qr():
+
+def qr(id):
     
-    text = session.get('id')
+    text = id
 
     if text:
         qr = qrcode.QRCode(
@@ -179,9 +178,9 @@ def qr():
         img_io = io.BytesIO()
         img.save(img_io, format='PNG')
         img_io.seek(0)
-      #   filename = '{}.png'.format(text)
-      #   filepath = os.path.join('static/images/qr', filename)
-      #   img.save(filepath)
+        filename = '{}.png'.format(text)
+        filepath = os.path.join('static/images/qr', filename)
+        img.save(filepath)
 
         return send_file(img_io, mimetype='image/png')
 
@@ -192,4 +191,4 @@ def qr():
    
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
